@@ -8,19 +8,28 @@ module PgSearch
     module ClassMethods
       # name:调用方给这个搜索起什么名字，将来就会生成同名 类方法
       # options：既可以是 Hash（静态配置），也可以是 Proc（动态运行时拼接）
+      # 定义一个名为pg_search_scope的方法，用于创建一个PostgreSQL搜索作用域
+      # 该方法接受两个参数：name（作用域的名称）和options（配置选项）
       def pg_search_scope(name, options)
-        # respond_to?方法是用于询问是否有:call(本例)方法，返回true或false
+        # 根据options参数的类型（Proc或可合并的Hash），决定如何处理查询参数
         options_proc = if options.respond_to?(:call)
+          # 如果options是一个Proc，直接使用它
+          # Proc是一个代码块的封装对象
           options
         elsif options.respond_to?(:merge)
+          # 如果options是一个Hash，创建一个Proc将查询参数与options合并
           ->(query) { {query: query}.merge(options) }
         else
+          # 如果options既不是Proc也不是可合并的Hash，抛出异常
           raise ArgumentError, "pg_search_scope expects a Hash or Proc"
         end
-        # 动态运行时定义类方法
+        # 动态运行时定义类方法（创建自己的命名方法）
         define_singleton_method(name) do |*args|
+          # 创建并配置一个Configuration实例
           config = Configuration.new(options_proc.call(*args), self)
+          # 创建一个ScopeOptions实例，并应用配置
           scope_options = ScopeOptions.new(config)
+          # 根据配置应用作用域选项
           scope_options.apply(self)
         end
       end
