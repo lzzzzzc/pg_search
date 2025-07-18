@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+# Active_record库，用于对象关系映射（ORM库：把数据库表映射成 Ruby 类，把记录映射成对象）
 require "active_record"
+
 require "active_support/concern"
 require "active_support/core_ext/module/attribute_accessors"
 require "active_support/core_ext/string/strip"
@@ -34,6 +36,7 @@ module PgSearch
   self.unaccent_function = "unaccent"
 
   class << self
+    # ...参数的意思是将当前方法收到的所有位置参数、关键字参数、块参数原封不动地传给另一个方法。
     def multisearch(...)
       PgSearch::Document.search(...)
     end
